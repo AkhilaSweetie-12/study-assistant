@@ -52,8 +52,8 @@ resource "azurerm_cognitive_deployment" "gpt4o" {
     version = "2024-11-20"
   }
 
-  sku {
-    name     = "Standard"
+  scale {
+    type     = "Standard"
     capacity = 10
   }
 }
@@ -68,8 +68,8 @@ resource "azurerm_cognitive_deployment" "embedding" {
     version = "2"
   }
 
-  sku {
-    name     = "Standard"
+  scale {
+    type     = "Standard"
     capacity = 10
   }
 
