@@ -8,13 +8,12 @@ terraform {
     }
   }
 
-  # Optional: uncomment to store state remotely in Azure Blob Storage
-  # backend "azurerm" {
-  #   resource_group_name  = "tfstate-rg"
-  #   storage_account_name = "<your-unique-storage-name>"
-  #   container_name       = "tfstate"
-  #   key                  = "study-assistant.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name  = "tfstate-rg"
+    storage_account_name = "studyassistate2"
+    container_name       = "tfstate"
+    key                  = "study-assistant.tfstate"
+  }
 }
 
 provider "azurerm" {
