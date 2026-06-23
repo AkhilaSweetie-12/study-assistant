@@ -77,7 +77,7 @@ jobs:
             echo "CHUNK_SIZE=1000"
             echo "CHUNK_OVERLAP=200"
             echo "TOP_K=5"
-          } > ../.env
+          } > $GITHUB_WORKSPACE/.env
 
       - name: Print Endpoints (keys are masked)
         run: |
@@ -90,5 +90,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: env-file
-          path: .env
+          path: ${{ github.workspace }}/.env
           retention-days: 1
