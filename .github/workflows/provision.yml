@@ -1,0 +1,99 @@
+name: Provision Azure Infrastructure
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+
+jobs:
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: terraform
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan
+
+      - name: Capture Terraform Outputs
+        id: tf_outputs
+        working-directory: terraform
+        run: |
+          OPENAI_ENDPOINT=$(terraform output -raw openai_endpoint)
+          OPENAI_KEY=$(terraform output -raw openai_api_key)
+          SEARCH_ENDPOINT=$(terraform output -raw search_endpoint)
+          SEARCH_KEY=$(terraform output -raw search_api_key)
+
+          # Mask secrets in logs
+          echo "::add-mask::$OPENAI_KEY"
+          echo "::add-mask::$SEARCH_KEY"
+
+          # Export as step outputs
+          echo "openai_endpoint=$OPENAI_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "openai_key=$OPENAI_KEY" >> $GITHUB_OUTPUT
+          echo "search_endpoint=$SEARCH_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "search_key=$SEARCH_KEY" >> $GITHUB_OUTPUT
+
+          # Write to .env file at repo root
+          cat > ../.env <<EOF
+          # ── Azure OpenAI ────────────────────────────────────────────────────
+          AZURE_OPENAI_ENDPOINT=$OPENAI_ENDPOINT
+          AZURE_OPENAI_API_KEY=$OPENAI_KEY
+          AZURE_OPENAI_API_VERSION=2024-02-01
+          AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o
+          AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-ada-002
+
+          # ── Azure AI Search ──────────────────────────────────────────────────
+          AZURE_SEARCH_ENDPOINT=$SEARCH_ENDPOINT
+          AZURE_SEARCH_API_KEY=$SEARCH_KEY
+          AZURE_SEARCH_STUDY_INDEX=study-materials
+          AZURE_SEARCH_CODE_INDEX=code-documentation
+
+          # ── RAG Tuning ───────────────────────────────────────────────────────
+          CHUNK_SIZE=1000
+          CHUNK_OVERLAP=200
+          TOP_K=5
+          EOF
+
+      - name: Print Endpoints (keys are masked)
+        run: |
+          echo "Azure OpenAI Endpoint : ${{ steps.tf_outputs.outputs.openai_endpoint }}"
+          echo "Azure Search Endpoint : ${{ steps.tf_outputs.outputs.search_endpoint }}"
+          echo "Azure OpenAI Key      : ***masked***"
+          echo "Azure Search Key      : ***masked***"
+
+      - name: Upload .env as artifact (download to populate local .env)
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-file
+          path: .env
+          retention-days: 1
