@@ -104,7 +104,7 @@ resource "azurerm_linux_web_app" "app" {
     application_stack {
       python_version = "3.12"
     }
-    startup_command = "pip install -r requirements.txt && python app.py"
+    app_command_line = "pip install -r requirements.txt && python app.py"
     always_on       = true
   }
 
