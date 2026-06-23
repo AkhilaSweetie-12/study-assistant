@@ -85,47 +85,42 @@ resource "azurerm_search_service" "search" {
 }
 
 # ── App Service ────────────────────────────────────────────────────────────────
+# NOTE: Uncomment below once VM quota is approved for this subscription.
+# Request quota at: Azure Portal → Quotas → Compute → Total Regional vCPUs → Request increase
 
-resource "azurerm_service_plan" "app_plan" {
-  name                = "${var.resource_group_name}-plan"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  os_type             = "Linux"
-  sku_name            = "B1"
-}
-
-resource "azurerm_linux_web_app" "app" {
-  name                = var.app_name
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  service_plan_id     = azurerm_service_plan.app_plan.id
-
-  site_config {
-    application_stack {
-      python_version = "3.12"
-    }
-    app_command_line = "pip install -r requirements.txt && python app.py"
-    always_on       = true
-  }
-
-  app_settings = {
-    "AZURE_OPENAI_ENDPOINT"             = azurerm_cognitive_account.openai.endpoint
-    "AZURE_OPENAI_API_KEY"              = azurerm_cognitive_account.openai.primary_access_key
-    "AZURE_OPENAI_API_VERSION"          = "2024-02-01"
-    "AZURE_OPENAI_CHAT_DEPLOYMENT"      = "gpt-4o"
-    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT" = "text-embedding-ada-002"
-    "AZURE_SEARCH_ENDPOINT"             = "https://${azurerm_search_service.search.name}.search.windows.net"
-    "AZURE_SEARCH_API_KEY"              = azurerm_search_service.search.primary_key
-    "AZURE_SEARCH_STUDY_INDEX"          = "study-materials"
-    "AZURE_SEARCH_CODE_INDEX"           = "code-documentation"
-    "CHUNK_SIZE"                        = "1000"
-    "CHUNK_OVERLAP"                     = "200"
-    "TOP_K"                             = "5"
-    "WEBSITES_PORT"                     = "7860"
-  }
-
-  depends_on = [
-    azurerm_cognitive_deployment.embedding,
-    azurerm_search_service.search
-  ]
-}
+# resource "azurerm_service_plan" "app_plan" {
+#   name                = "${var.resource_group_name}-plan"
+#   resource_group_name = azurerm_resource_group.rg.name
+#   location            = var.location
+#   os_type             = "Linux"
+#   sku_name            = "B1"
+# }
+#
+# resource "azurerm_linux_web_app" "app" {
+#   name                = var.app_name
+#   resource_group_name = azurerm_resource_group.rg.name
+#   location            = var.location
+#   service_plan_id     = azurerm_service_plan.app_plan.id
+#
+#   site_config {
+#     application_stack { python_version = "3.12" }
+#     app_command_line = "pip install -r requirements.txt && python app.py"
+#     always_on        = true
+#   }
+#
+#   app_settings = {
+#     "AZURE_OPENAI_ENDPOINT"             = azurerm_cognitive_account.openai.endpoint
+#     "AZURE_OPENAI_API_KEY"              = azurerm_cognitive_account.openai.primary_access_key
+#     "AZURE_OPENAI_API_VERSION"          = "2024-02-01"
+#     "AZURE_OPENAI_CHAT_DEPLOYMENT"      = "gpt-4o"
+#     "AZURE_OPENAI_EMBEDDING_DEPLOYMENT" = "text-embedding-ada-002"
+#     "AZURE_SEARCH_ENDPOINT"             = "https://${azurerm_search_service.search.name}.search.windows.net"
+#     "AZURE_SEARCH_API_KEY"              = azurerm_search_service.search.primary_key
+#     "AZURE_SEARCH_STUDY_INDEX"          = "study-materials"
+#     "AZURE_SEARCH_CODE_INDEX"           = "code-documentation"
+#     "CHUNK_SIZE"                        = "1000"
+#     "CHUNK_OVERLAP"                     = "200"
+#     "TOP_K"                             = "5"
+#     "WEBSITES_PORT"                     = "7860"
+#   }
+# }
