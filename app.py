@@ -209,7 +209,7 @@ with gr.Blocks(
                 # Right panel — chat
                 with gr.Column(scale=2):
                     gr.Markdown("### 💬 Ask Questions")
-                    study_chatbot = gr.Chatbot(elem_classes="chatbot", show_label=False, type="messages")
+                    study_chatbot = gr.Chatbot(elem_classes="chatbot", show_label=False)
                     study_input = gr.Textbox(
                         placeholder="e.g. Explain the concept of backpropagation...",
                         lines=2,
@@ -255,7 +255,7 @@ with gr.Blocks(
                 # Right panel — chat
                 with gr.Column(scale=2):
                     gr.Markdown("### 🔍 Search Your Codebase")
-                    code_chatbot = gr.Chatbot(elem_classes="chatbot", show_label=False, type="messages")
+                    code_chatbot = gr.Chatbot(elem_classes="chatbot", show_label=False)
                     code_input = gr.Textbox(
                         placeholder="e.g. How does authentication work? Show me the database connection setup...",
                         lines=2,
@@ -273,4 +273,5 @@ with gr.Blocks(
 
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, show_error=True, theme=gr.themes.Soft(primary_hue="blue", secondary_hue="slate"), css=".chatbot {height: 460px;}")
+    port = int(os.environ.get("PORT", 7860))
+    demo.launch(server_name="0.0.0.0", server_port=port, show_error=True, theme=gr.themes.Soft(primary_hue="blue", secondary_hue="slate"), css=".chatbot {height: 460px;}")

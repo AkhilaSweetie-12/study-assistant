@@ -1,5 +1,8 @@
 .env
 __pycache__/
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/tfplan
 *.pyc
 *.pyo
 .venv/

@@ -28,6 +28,12 @@ variable "search_name" {
   default     = "study-assistant-search"
 }
 
+variable "app_name" {
+  description = "Name of the Azure App Service web app (must be globally unique)"
+  type        = string
+  default     = "study-assistant-app"
+}
+
 variable "search_sku" {
   description = "Azure AI Search pricing tier: free, basic, standard"
   type        = string

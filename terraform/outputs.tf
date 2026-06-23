@@ -24,3 +24,13 @@ output "resource_group_name" {
   description = "Resource group containing all resources"
   value       = azurerm_resource_group.rg.name
 }
+
+output "app_url" {
+  description = "Public URL of the deployed Gradio app"
+  value       = "https://${azurerm_linux_web_app.app.default_hostname}"
+}
+
+output "app_name" {
+  description = "Azure App Service name (used for deployment)"
+  value       = azurerm_linux_web_app.app.name
+}

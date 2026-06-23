@@ -92,3 +92,33 @@ jobs:
           name: env-file
           path: ${{ github.workspace }}/.env
           retention-days: 1
+
+      - name: Get App Service name from Terraform
+        id: app_info
+        working-directory: terraform
+        run: |
+          APP_NAME=$(terraform output -raw app_name)
+          APP_URL=$(terraform output -raw app_url)
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+
+      - name: Deploy app code to Azure App Service
+        run: |
+          zip -r app.zip . \
+            --exclude ".git/*" \
+            --exclude ".terraform/*" \
+            --exclude "__pycache__/*" \
+            --exclude "*.pyc" \
+            --exclude "terraform/*" \
+            --exclude ".github/*"
+
+          az webapp deploy \
+            --resource-group study-assistant-rg \
+            --name ${{ steps.app_info.outputs.app_name }} \
+            --src-path app.zip \
+            --type zip
+
+      - name: Print App URL
+        run: |
+          echo "App deployed successfully!"
+          echo "URL: ${{ steps.app_info.outputs.app_url }}"
